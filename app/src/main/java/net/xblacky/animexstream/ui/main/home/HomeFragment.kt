@@ -49,7 +49,7 @@ class HomeFragment : Fragment(), View.OnClickListener, HomeController.EpoxyAdapt
 
         setAdapter()
         setClickListeners()
-        viewModel.queryDB()
+//        viewModel.queryDB()
         viewModelObserver()
     }
 
