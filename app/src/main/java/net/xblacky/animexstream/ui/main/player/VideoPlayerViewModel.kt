@@ -62,7 +62,7 @@ class VideoPlayerViewModel @Inject constructor(
 
     //// ---------------------------New Methods------------------------------------------------------
 
-    fun fetchEpisodeData(forceRefresh: Boolean = false) {
+    fun fetchEpisodeData(forceRefresh: Boolean = true) {
         viewModelScope.launch(dispatcher) {
             updateLoading(true)
 

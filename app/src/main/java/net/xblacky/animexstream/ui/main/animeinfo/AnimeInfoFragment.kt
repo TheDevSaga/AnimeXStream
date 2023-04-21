@@ -1,6 +1,5 @@
 package net.xblacky.animexstream.ui.main.animeinfo
 
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,24 +8,19 @@ import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.transition.TransitionInflater
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade
 import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.transition.MaterialContainerTransform
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_animeinfo.*
 import kotlinx.android.synthetic.main.fragment_animeinfo.view.*
-import kotlinx.android.synthetic.main.fragment_animeinfo.view.animeInfoRoot
 import kotlinx.android.synthetic.main.loading.view.*
 import net.xblacky.animexstream.R
 import net.xblacky.animexstream.ui.main.animeinfo.di.AnimeInfoFactory
 import net.xblacky.animexstream.ui.main.animeinfo.epoxy.AnimeInfoController
-import net.xblacky.animexstream.ui.main.home.HomeFragmentDirections
 import net.xblacky.animexstream.utils.ItemOffsetDecoration
 import net.xblacky.animexstream.utils.Tags.GenreTags
 import net.xblacky.animexstream.utils.Utils
