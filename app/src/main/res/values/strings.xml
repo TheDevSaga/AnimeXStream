@@ -21,7 +21,7 @@
     <string name="removed_from_favourites">Anime removed from Favourites</string>
     <string name="see_more"><![CDATA[See more >]]></string>
     <string name="video_quality">Video Quality</string>
-    <string name="previous_episode_icon">Previous Episode Icon</string>
+    <string name="previous_episode_icon" translatable="false">Previous Episode Icon</string>
     <string name="prev_ep">Prev. Ep.</string>
     <string name="next_ep">Next Ep.</string>
     <string name="qualityAuto">Quality(Auto)</string>

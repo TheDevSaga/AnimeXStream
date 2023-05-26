@@ -5,7 +5,6 @@ import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.view.animation.ScaleAnimation
 import com.google.android.exoplayer2.ui.PlayerView
-import kotlinx.android.synthetic.main.exo_player_custom_controls.*
 import net.xblacky.animexstream.R
 
 object CustomAnimation {

@@ -10,17 +10,10 @@ import com.airbnb.epoxy.EpoxyHolder
 import com.airbnb.epoxy.EpoxyModelClass
 import com.airbnb.epoxy.EpoxyModelWithHolder
 import com.bumptech.glide.Glide
-import kotlinx.android.synthetic.main.recycler_anime_mini_header.view.*
-import kotlinx.android.synthetic.main.recycler_anime_popular.view.*
-import kotlinx.android.synthetic.main.recycler_anime_recent_sub_dub_2.view.*
 import net.xblacky.animexstream.R
 import net.xblacky.animexstream.utils.Tags.GenreTags
 import net.xblacky.animexstream.utils.model.AnimeMetaModel
 import org.apmem.tools.layouts.FlowLayout
-import kotlinx.android.synthetic.main.recycler_anime_popular.view.animeCardView as animeCardViewSubDub
-import kotlinx.android.synthetic.main.recycler_anime_popular.view.animeTitle as animeTitleSubDub
-import kotlinx.android.synthetic.main.recycler_anime_recent_sub_dub_2.view.animeImage as animeImageSubDub
-import kotlinx.android.synthetic.main.recycler_anime_recent_sub_dub_2.view.episodeNumber as episodeNumberSubDub
 
 
 @EpoxyModelClass(layout = R.layout.recycler_anime_recent_sub_dub_2)
@@ -62,10 +55,10 @@ abstract class AnimeSubDubModel2 : EpoxyModelWithHolder<AnimeSubDubModel2.SubDub
         lateinit var animeEpisode: TextView
 
         override fun bindView(itemView: View) {
-            animeImageView = itemView.animeImageSubDub
-            animeCardView = itemView.animeCardViewSubDub
-            animeTitle = itemView.animeTitleSubDub
-            animeEpisode = itemView.episodeNumberSubDub
+            animeImageView = itemView.findViewById(R.id.animeImage)
+            animeCardView = itemView.findViewById(R.id.animeCardView)
+            animeTitle = itemView.findViewById(R.id.animeTitle)
+            animeEpisode = itemView.findViewById(R.id.episodeNumber)
         }
 
     }
@@ -122,12 +115,12 @@ abstract class AnimePopularModel : EpoxyModelWithHolder<AnimePopularModel.Popula
         lateinit var cardView: CardView
 
         override fun bindView(itemView: View) {
-            animeImageView = itemView.animeImage
-            animeTitle = itemView.animeTitle
-            animeEpisode = itemView.episodeNumber
-            flowLayout = itemView.flowLayout
-            rootView = itemView.rootLayout
-            cardView = itemView.animeCardView
+            animeImageView = itemView.findViewById(R.id.animeImage)
+            animeTitle = itemView.findViewById(R.id.animeTitle)
+            animeEpisode = itemView.findViewById(R.id.episodeNumber)
+            flowLayout = itemView.findViewById(R.id.flowLayout)
+            rootView = itemView.findViewById(R.id.rootLayout)
+            cardView = itemView.findViewById(R.id.animeCardView)
         }
 
     }
@@ -152,7 +145,7 @@ abstract class AnimeMiniHeaderModel :
         lateinit var animeType: TextView
 
         override fun bindView(itemView: View) {
-            animeType = itemView.typeName
+            animeType = itemView.findViewById(R.id.typeName)
         }
 
     }

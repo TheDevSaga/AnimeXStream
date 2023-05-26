@@ -27,16 +27,12 @@ import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.HttpDataSource
 import com.google.android.exoplayer2.upstream.HttpDataSource.InvalidResponseCodeException
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.error_screen_video_player.view.*
-import kotlinx.android.synthetic.main.exo_player_custom_controls.*
-import kotlinx.android.synthetic.main.exo_player_custom_controls.view.*
-import kotlinx.android.synthetic.main.fragment_video_player.*
-import kotlinx.android.synthetic.main.fragment_video_player.view.*
-import kotlinx.android.synthetic.main.fragment_video_player_placeholder.view.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.xblacky.animexstream.R
+import net.xblacky.animexstream.databinding.ExoPlayerCustomControlsBinding
+import net.xblacky.animexstream.databinding.FragmentVideoPlayerBinding
 import net.xblacky.animexstream.ui.main.player.di.PlayerDI
 import net.xblacky.animexstream.ui.main.player.utils.CustomOnScaleGestureListener
 import net.xblacky.animexstream.utils.Utils
@@ -48,7 +44,6 @@ import net.xblacky.animexstream.utils.model.Content
 import net.xblacky.animexstream.utils.preference.Preference
 import net.xblacky.animexstream.utils.touchevents.TouchUtils
 import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import timber.log.Timber
 import java.lang.Exception
 import javax.inject.Inject
@@ -67,8 +62,9 @@ class VideoPlayerFragment : Fragment(), View.OnClickListener, Player.Listener,
     @PlayerDI.ExoOkHttpClient
     lateinit var okHttpClient: OkHttpClient
 
+    private lateinit var binding :FragmentVideoPlayerBinding
     private lateinit var videoUrl: String
-    private lateinit var rootView: View
+    private lateinit var controllerBinding: ExoPlayerCustomControlsBinding
     private lateinit var player: ExoPlayer
     private lateinit var trackSelectionFactory: ExoTrackSelection.Factory
     private lateinit var trackSelector: DefaultTrackSelector
@@ -101,12 +97,13 @@ class VideoPlayerFragment : Fragment(), View.OnClickListener, Player.Listener,
         savedInstanceState: Bundle?
     ): View {
         super.onCreateView(inflater, container, savedInstanceState)
-        rootView = inflater.inflate(R.layout.fragment_video_player, container, false)
+        binding = FragmentVideoPlayerBinding.inflate(inflater,container,false)
+        controllerBinding = ExoPlayerCustomControlsBinding.bind(binding.root)
         setClickListeners()
         initializeAudioManager()
         initializePlayer()
         sharedPreferences = Preference(requireContext())
-        return rootView
+        return binding.root
     }
 
     override fun onStart() {
@@ -130,43 +127,43 @@ class VideoPlayerFragment : Fragment(), View.OnClickListener, Player.Listener,
     private fun initializePlayer() {
         trackSelectionFactory = AdaptiveTrackSelection.Factory()
         trackSelector = DefaultTrackSelector(requireContext(), trackSelectionFactory)
-        rootView.exoPlayerFrameLayout.setAspectRatio(16f / 9f)
+        binding.exoPlayerFrameLayout.setAspectRatio(16f / 9f)
         player = ExoPlayer.Builder(requireContext()).setTrackSelector(trackSelector).build()
         val audioAttributes: AudioAttributes = AudioAttributes.Builder()
             .setUsage(C.USAGE_MEDIA)
-            .setContentType(C.CONTENT_TYPE_MOVIE)
+            .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
             .build()
 
         player.playWhenReady = true
         player.setAudioAttributes(audioAttributes, false)
         player.addListener(this)
         player.setSeekParameters(SeekParameters.CLOSEST_SYNC)
-        rootView.exoPlayerView.player = player
+        binding.exoPlayerView.player = player
 
 
     }
 
     private fun setGestureDetector() {
         val scaleGestureDetector =
-            ScaleGestureDetector(requireContext(), CustomOnScaleGestureListener(exoPlayerView))
-        exoPlayerView.setOnTouchListener { _, event ->
+            ScaleGestureDetector(requireContext(), CustomOnScaleGestureListener(binding.exoPlayerView))
+        binding.exoPlayerView.setOnTouchListener { _, event ->
             scaleGestureDetector.onTouchEvent(event)
             if (event?.let { TouchUtils.isAClick(event = it) } == true) {
-                exoPlayerView.performClick()
+                binding.exoPlayerView.performClick()
             }
             true
         }
     }
 
     private fun setClickListeners() {
-        rootView.exo_track_selection_view.setOnClickListener(this)
-        rootView.exo_speed_selection_view.setOnClickListener(this)
-        rootView.exo_rew.setOnClickListener(this)
-        rootView.exo_ffwd.setOnClickListener(this)
-        rootView.errorButton.setOnClickListener(this)
-        rootView.back.setOnClickListener(this)
-        rootView.nextEpisode.setOnClickListener(this)
-        rootView.previousEpisode.setOnClickListener(this)
+        controllerBinding.exoTrackSelectionView.setOnClickListener(this)
+        controllerBinding.exoSpeedSelectionView.setOnClickListener(this)
+        controllerBinding.exoRew.setOnClickListener(this)
+        controllerBinding.exoFfwd.setOnClickListener(this)
+//        controllerBinding.errorButton.setOnClickListener(this)
+        controllerBinding.back.setOnClickListener(this)
+        controllerBinding.nextEpisode.setOnClickListener(this)
+        controllerBinding.previousEpisode.setOnClickListener(this)
     }
 
     private fun buildMediaSource(url: String): MediaSource {
@@ -192,23 +189,23 @@ class VideoPlayerFragment : Fragment(), View.OnClickListener, Player.Listener,
     fun updateContent(content: Content) {
         Timber.e("Content Updated uRL: ${content.urls}")
         this.content = content
-        animeName.text = content.animeName
+        controllerBinding.animeName.text = content.animeName
         val text = content.episodeName
-        episodeName.text = text
-        exoPlayerView.videoSurfaceView?.visibility = View.GONE
+        controllerBinding.episodeName.text = text
+        binding.exoPlayerView.videoSurfaceView?.visibility = View.GONE
 
         this.content.nextEpisodeUrl?.let {
-            nextEpisode.visibility = View.VISIBLE
+            controllerBinding.nextEpisode.visibility = View.VISIBLE
         } ?: kotlin.run {
-            nextEpisode.visibility = View.GONE
+            controllerBinding.nextEpisode.visibility = View.GONE
         }
         this.content.previousEpisodeUrl?.let {
-            previousEpisode.visibility = View.VISIBLE
+            controllerBinding.previousEpisode.visibility = View.VISIBLE
         } ?: kotlin.run {
-            previousEpisode.visibility = View.GONE
+            controllerBinding.previousEpisode.visibility = View.GONE
         }
 
-        if (!content.urls.isNullOrEmpty()) {
+        if (!content.urls.isEmpty()) {
             try {
                 updateVideoUrl(content.urls[selectedQuality].url)
                 updateQualityText(selectedQuality)
@@ -277,15 +274,14 @@ class VideoPlayerFragment : Fragment(), View.OnClickListener, Player.Listener,
     }
 
     private fun showM3U8TrackSelector() {
-        mappedTrackInfo = trackSelector?.currentMappedTrackInfo
+        mappedTrackInfo = trackSelector.currentMappedTrackInfo
 
         try {
             TrackSelectionDialogBuilder(
                 requireContext(),
                 getString(R.string.video_quality),
-                trackSelector,
+                player,
                 0
-
             ).build().show()
         } catch (ignored: java.lang.NullPointerException) {
         }
@@ -294,16 +290,15 @@ class VideoPlayerFragment : Fragment(), View.OnClickListener, Player.Listener,
 
 
     override fun onTracksChanged(
-        trackGroups: TrackGroupArray,
-        trackSelections: TrackSelectionArray
+       tracks: Tracks
     ) {
         if (IS_MEDIA_M3U8) {
             try {
-                val videoQuality =
-                    trackSelections.get(0)!!.getFormat(0).height.toString() + "p"
-                val quality = "Quality($videoQuality)"
-                Timber.e("Quality $quality")
-                rootView.exoQuality.text = quality
+//                val videoQuality =
+//                    tracks.groups[0]!!.getTrackSupport(0).getFormat(0).height.toString() + "p"
+//                val quality = "Quality($videoQuality)"
+//                Timber.e("Quality $quality")
+//                controllerBinding.exoQuality.text = quality
             } catch (ignored: Exception) {
             }
 
@@ -319,7 +314,7 @@ class VideoPlayerFragment : Fragment(), View.OnClickListener, Player.Listener,
                     watchedDuration = watchedDuration,
                     totalDuration = totalDuration
                 )
-                exo_remaining_time.text = remainingTime
+                controllerBinding.exoRemainingTime.text = remainingTime
 
                 delay(1000L)
             }
@@ -327,7 +322,7 @@ class VideoPlayerFragment : Fragment(), View.OnClickListener, Player.Listener,
     }
 
     private fun refreshData() {
-        if (::content.isInitialized && !content.urls.isNullOrEmpty()) {
+        if (::content.isInitialized && !content.urls.isEmpty()) {
             loadVideo(player.currentPosition, true)
         } else {
             (activity as VideoPlayerActivity).refreshM3u8Url()
@@ -337,8 +332,8 @@ class VideoPlayerFragment : Fragment(), View.OnClickListener, Player.Listener,
 
     private fun seekForward() {
         seekExoPlayerForward()
-        CustomAnimation.rotateForward(exo_ffwd)
-        CustomAnimation.forwardAnimate(exo_forward_plus, exo_forward_text)
+        CustomAnimation.rotateForward(controllerBinding.exoFfwd)
+        CustomAnimation.forwardAnimate(controllerBinding.exoForwardPlus, controllerBinding.exoForwardText)
     }
 
     private fun seekExoPlayerForward() {
@@ -352,8 +347,8 @@ class VideoPlayerFragment : Fragment(), View.OnClickListener, Player.Listener,
 
     private fun seekRewind() {
         seekExoPlayerBackward()
-        CustomAnimation.rotateBackward(exo_rew)
-        CustomAnimation.rewindAnimate(exo_rewind_minus, exo_rewind_text)
+        CustomAnimation.rotateBackward(controllerBinding.exoRew)
+        CustomAnimation.rewindAnimate(controllerBinding.exoRewindMinus, controllerBinding.exoRewindText)
     }
 
     private fun seekExoPlayerBackward() {
@@ -383,11 +378,11 @@ class VideoPlayerFragment : Fragment(), View.OnClickListener, Player.Listener,
     }
 
     fun showLoading(showLoading: Boolean) {
-        if (::rootView.isInitialized) {
+        if (::controllerBinding.isInitialized) {
             if (showLoading) {
-                rootView.videoPlayerLoading.visibility = View.VISIBLE
+                binding.loader.videoPlayerLoading.visibility = View.VISIBLE
             } else {
-                rootView.videoPlayerLoading.visibility = View.GONE
+                binding.loader.videoPlayerLoading.visibility = View.GONE
             }
         }
     }
@@ -395,12 +390,12 @@ class VideoPlayerFragment : Fragment(), View.OnClickListener, Player.Listener,
 
     fun showErrorLayout(show: Boolean, errorMsgId: Int, errorCode: Int) {
         if (show) {
-            rootView.errorLayout.visibility = View.VISIBLE
+            binding.error.errorLayout.visibility = View.VISIBLE
             context.let {
-                rootView.errorText.text = getString(errorMsgId)
+                binding.error.errorText.text = getString(errorMsgId)
                 when (errorCode) {
                     ERROR_CODE_DEFAULT -> {
-                        rootView.errorImage.setImageDrawable(
+                        binding.error.errorImage.setImageDrawable(
                             ResourcesCompat.getDrawable(
                                 resources,
                                 R.drawable.ic_error,
@@ -409,7 +404,7 @@ class VideoPlayerFragment : Fragment(), View.OnClickListener, Player.Listener,
                         )
                     }
                     RESPONSE_UNKNOWN -> {
-                        rootView.errorImage.setImageDrawable(
+                        binding.error.errorImage.setImageDrawable(
                             ResourcesCompat.getDrawable(
                                 resources,
                                 R.drawable.ic_error,
@@ -418,7 +413,7 @@ class VideoPlayerFragment : Fragment(), View.OnClickListener, Player.Listener,
                         )
                     }
                     NO_INTERNET_CONNECTION -> {
-                        rootView.errorImage.setImageDrawable(
+                        binding.error.errorImage.setImageDrawable(
                             ResourcesCompat.getDrawable(
                                 resources,
                                 R.drawable.ic_internet,
@@ -429,7 +424,7 @@ class VideoPlayerFragment : Fragment(), View.OnClickListener, Player.Listener,
                 }
             }
         } else {
-            rootView.errorLayout.visibility = View.GONE
+            binding.error.errorLayout.visibility = View.GONE
         }
     }
 
@@ -465,7 +460,7 @@ class VideoPlayerFragment : Fragment(), View.OnClickListener, Player.Listener,
     private fun updateQualityText(index: Int = 0) {
         selectedQuality = index
         val quality = "Quality(${content.urls[index].label})"
-        rootView.exoQuality.text = quality
+        controllerBinding.exoQuality.text = quality
     }
 
     private fun getQualityArray(): ArrayList<String> {
@@ -489,7 +484,7 @@ class VideoPlayerFragment : Fragment(), View.OnClickListener, Player.Listener,
         selectedSpeed = speed
         checkedItem = speed
         val speedText = "Speed(${showableSpeed[speed]})"
-        exoSpeedText.text = speedText
+        controllerBinding.exoSpeedText.text = speedText
         setPlaybackSpeed(speeds[selectedSpeed])
     }
 
@@ -541,19 +536,19 @@ class VideoPlayerFragment : Fragment(), View.OnClickListener, Player.Listener,
         isVideoPlaying = playWhenReady
         if (isVideoPlaying) listenToRemaningTime() else job?.cancel()
         if (playbackState == Player.STATE_READY && playWhenReady) {
-            rootView.exo_play.setImageResource(R.drawable.ic_media_play)
-            rootView.exo_pause.setImageResource(R.drawable.ic_media_pause)
+            controllerBinding.exoPlay.setImageResource(R.drawable.ic_media_play)
+            controllerBinding.exoPause.setImageResource(R.drawable.ic_media_pause)
 
             playOrPausePlayer(true)
 
         }
         if (playbackState == Player.STATE_BUFFERING && playWhenReady) {
-            rootView.exo_play.setImageResource(0)
-            rootView.exo_pause.setImageResource(0)
+            controllerBinding.exoPlay.setImageResource(0)
+            controllerBinding.exoPause.setImageResource(0)
             showLoading(false)
         }
         if (playbackState == Player.STATE_READY) {
-            exoPlayerView.videoSurfaceView?.visibility = View.VISIBLE
+            binding.exoPlayerView.videoSurfaceView?.visibility = View.VISIBLE
         }
     }
 

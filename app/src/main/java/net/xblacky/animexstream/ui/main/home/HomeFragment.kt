@@ -16,9 +16,9 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.transition.MaterialFadeThrough
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.fragment_home.view.*
 import net.xblacky.animexstream.BuildConfig
 import net.xblacky.animexstream.R
+import net.xblacky.animexstream.databinding.FragmentHomeBinding
 import net.xblacky.animexstream.ui.main.home.epoxy.HomeController
 import net.xblacky.animexstream.utils.EventObserver
 import net.xblacky.animexstream.utils.constants.C
@@ -29,18 +29,18 @@ import timber.log.Timber
 class HomeFragment : Fragment(), View.OnClickListener, HomeController.EpoxyAdapterCallbacks {
 
 
-    private lateinit var rootView: View
     private lateinit var homeController: HomeController
     private var doubleClickLastTime = 0L
 
     private val viewModel: HomeViewModel by activityViewModels()
+    private lateinit var binding:FragmentHomeBinding
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        rootView = inflater.inflate(R.layout.fragment_home, container, false)
-        return rootView
+        binding = FragmentHomeBinding.inflate(inflater,container,false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -57,7 +57,7 @@ class HomeFragment : Fragment(), View.OnClickListener, HomeController.EpoxyAdapt
         homeController = HomeController(this)
         homeController.isDebugLoggingEnabled = true
         homeController.setFilterDuplicates(true)
-        val homeRecyclerView = rootView.recyclerView
+        val homeRecyclerView = binding.recyclerView
         homeRecyclerView.layoutManager = LinearLayoutManager(context)
         homeRecyclerView.adapter = homeController.adapter
     }
@@ -67,7 +67,7 @@ class HomeFragment : Fragment(), View.OnClickListener, HomeController.EpoxyAdapt
             homeController.setData(it)
         }
         viewModel.scrollToTopEvent.observe(viewLifecycleOwner, EventObserver {
-            rootView.recyclerView.smoothScrollToPosition(0)
+            binding.recyclerView.smoothScrollToPosition(0)
         })
 
         viewModel.updateModel.observe(viewLifecycleOwner) {
@@ -90,16 +90,16 @@ class HomeFragment : Fragment(), View.OnClickListener, HomeController.EpoxyAdapt
     }
 
     private fun setClickListeners() {
-        rootView.header.setOnClickListener(this)
-        rootView.search.setOnClickListener(this)
-        rootView.favorite.setOnClickListener(this)
+        binding.header.setOnClickListener(this)
+        binding.search.setOnClickListener(this)
+        binding.favorite.setOnClickListener(this)
     }
 
     override fun onClick(v: View?) {
         when (v?.id) {
             R.id.header -> {
                 doubleClickLastTime = if (System.currentTimeMillis() - doubleClickLastTime < 300) {
-                    rootView.recyclerView.smoothScrollToPosition(0)
+                    binding.recyclerView.smoothScrollToPosition(0)
                     0L
                 } else {
                     System.currentTimeMillis()
@@ -108,7 +108,7 @@ class HomeFragment : Fragment(), View.OnClickListener, HomeController.EpoxyAdapt
             }
             R.id.search -> {
                 val extras =
-                    FragmentNavigatorExtras(rootView.search to resources.getString(R.string.search_transition))
+                    FragmentNavigatorExtras(binding.search to resources.getString(R.string.search_transition))
                 findNavController().navigate(
                     HomeFragmentDirections.actionHomeFragmentToSearchFragment(),
                     extras
@@ -116,7 +116,7 @@ class HomeFragment : Fragment(), View.OnClickListener, HomeController.EpoxyAdapt
             }
             R.id.favorite -> {
                 val extras = FragmentNavigatorExtras(
-                    rootView.favorite to resources.getString(R.string.favourite_transition)
+                    binding.favorite to resources.getString(R.string.favourite_transition)
 
                 )
                 findNavController().navigate(
