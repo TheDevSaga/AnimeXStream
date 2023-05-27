@@ -30,6 +30,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.arosara.anisaw.R
+import com.arosara.anisaw.databinding.ErrorScreenVideoPlayerBinding
 import com.arosara.anisaw.databinding.ExoPlayerCustomControlsBinding
 import com.arosara.anisaw.databinding.FragmentVideoPlayerBinding
 import com.arosara.anisaw.ui.main.player.di.PlayerDI
@@ -62,6 +63,7 @@ class VideoPlayerFragment : Fragment(), View.OnClickListener, Player.Listener,
     lateinit var okHttpClient: OkHttpClient
 
     private lateinit var binding :FragmentVideoPlayerBinding
+    private lateinit var errorBinding :ErrorScreenVideoPlayerBinding
     private lateinit var videoUrl: String
     private lateinit var controllerBinding: ExoPlayerCustomControlsBinding
     private lateinit var player: ExoPlayer
@@ -98,6 +100,7 @@ class VideoPlayerFragment : Fragment(), View.OnClickListener, Player.Listener,
         super.onCreateView(inflater, container, savedInstanceState)
         binding = FragmentVideoPlayerBinding.inflate(inflater,container,false)
         controllerBinding = ExoPlayerCustomControlsBinding.bind(binding.root)
+        errorBinding = ErrorScreenVideoPlayerBinding.bind(binding.root)
         setClickListeners()
         initializeAudioManager()
         initializePlayer()
@@ -159,7 +162,7 @@ class VideoPlayerFragment : Fragment(), View.OnClickListener, Player.Listener,
         controllerBinding.exoSpeedSelectionView.setOnClickListener(this)
         controllerBinding.exoRew.setOnClickListener(this)
         controllerBinding.exoFfwd.setOnClickListener(this)
-//        controllerBinding.errorButton.setOnClickListener(this)
+        errorBinding.errorButton.setOnClickListener(this)
         controllerBinding.back.setOnClickListener(this)
         controllerBinding.nextEpisode.setOnClickListener(this)
         controllerBinding.previousEpisode.setOnClickListener(this)

@@ -28,6 +28,7 @@ import com.google.android.material.transition.MaterialContainerTransform
 import com.google.android.material.transition.MaterialFadeThrough
 import com.arosara.anisaw.R
 import com.arosara.anisaw.databinding.FragmentSearchBinding
+import com.arosara.anisaw.databinding.LoadingBinding
 import com.arosara.anisaw.ui.main.search.epoxy.SearchController
 import com.arosara.anisaw.utils.CommonViewModel2
 import com.arosara.anisaw.utils.ItemOffsetDecoration
@@ -39,6 +40,7 @@ class SearchFragment : Fragment(), View.OnClickListener,
     SearchController.EpoxySearchAdapterCallbacks {
 
     private lateinit var binding: FragmentSearchBinding
+    private lateinit var loadingBinding: LoadingBinding
     private lateinit var viewModel: SearchViewModel
     private lateinit var searchController: SearchController
     override fun onCreateView(
@@ -47,6 +49,7 @@ class SearchFragment : Fragment(), View.OnClickListener,
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentSearchBinding.inflate(inflater, container,false)
+        loadingBinding = LoadingBinding.bind(binding.root)
         return binding.root
     }
 
@@ -125,13 +128,13 @@ class SearchFragment : Fragment(), View.OnClickListener,
 
         viewModel.loadingModel.observe(viewLifecycleOwner, Observer {
             if (it.isListEmpty) {
-                if (it.loading == CommonViewModel2.Loading.LOADING) binding.loader.loading.visibility =
+                if (it.loading == CommonViewModel2.Loading.LOADING) loadingBinding.loading.visibility =
                     View.VISIBLE
                 //TODO Error Visibiity GONE
 
                 else if (it.loading == CommonViewModel2.Loading.ERROR
                 //Todo Error visisblity visible
-                ) binding.loader.loading.visibility = View.GONE
+                ) loadingBinding.loading.visibility = View.GONE
             } else {
                 searchController.setData(
                     viewModel.searchList.value,
@@ -144,7 +147,7 @@ class SearchFragment : Fragment(), View.OnClickListener,
                         Snackbar.LENGTH_SHORT
                     ).show()
                 }
-                else if (it.loading == CommonViewModel2.Loading.COMPLETED) binding.loader.loading.visibility =
+                else if (it.loading == CommonViewModel2.Loading.COMPLETED) loadingBinding.loading.visibility =
                     View.GONE
 
             }
