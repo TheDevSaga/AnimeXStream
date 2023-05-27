@@ -1,11 +1,8 @@
 package net.xblacky.animexstream.utils.model
 
-import android.os.Parcelable
 import io.realm.RealmList
 import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
-import kotlinx.android.parcel.Parcelize
-import java.sql.Timestamp
 
 public open class AnimeMetaModel(
     @PrimaryKey

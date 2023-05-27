@@ -12,8 +12,6 @@ import android.view.View
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.activity_video_player.*
-import kotlinx.android.synthetic.main.fragment_video_player.*
 import net.xblacky.animexstream.R
 import net.xblacky.animexstream.utils.model.Content
 import timber.log.Timber
@@ -22,7 +20,10 @@ import android.view.WindowInsetsController
 
 import android.view.WindowInsets
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
+import androidx.fragment.app.findFragment
 import androidx.lifecycle.Observer
+import net.xblacky.animexstream.databinding.ActivityVideoPlayerBinding
 import net.xblacky.animexstream.utils.preference.Preference
 import javax.inject.Inject
 
@@ -32,14 +33,20 @@ class VideoPlayerActivity : AppCompatActivity(), VideoPlayerListener {
 
     private val viewModel: VideoPlayerViewModel by viewModels()
 
+    private lateinit var  binding : ActivityVideoPlayerBinding
+    private lateinit var  videoPlayerFragment: VideoPlayerFragment
+
     @Inject
     lateinit var preference: Preference
     private var episodeNumber: String? = ""
     private var animeName: String? = ""
     private lateinit var content: Content
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_video_player)
+        binding = ActivityVideoPlayerBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        videoPlayerFragment = supportFragmentManager.findFragmentById(R.id.playerFragment) as VideoPlayerFragment
 
         getExtra(intent)
         setObserver()
@@ -47,12 +54,13 @@ class VideoPlayerActivity : AppCompatActivity(), VideoPlayerListener {
     }
 
 
+
     override fun onNewIntent(intent: Intent?) {
-        (playerFragment as VideoPlayerFragment).playOrPausePlayer(
+        videoPlayerFragment.playOrPausePlayer(
             playWhenReady = false,
             loseAudioFocus = false
         )
-        (playerFragment as VideoPlayerFragment).saveWatchedDuration()
+        videoPlayerFragment.saveWatchedDuration()
         getExtra(intent)
         super.onNewIntent(intent)
 
@@ -98,7 +106,7 @@ class VideoPlayerActivity : AppCompatActivity(), VideoPlayerListener {
                     PackageManager.FEATURE_PICTURE_IN_PICTURE
                 )
             && hasPipPermission()
-            && (playerFragment as VideoPlayerFragment).isVideoPlaying()
+            && videoPlayerFragment.isVideoPlaying()
         ) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 val params = PictureInPictureParams.Builder()
@@ -136,7 +144,7 @@ class VideoPlayerActivity : AppCompatActivity(), VideoPlayerListener {
                 .hasSystemFeature(
                     PackageManager.FEATURE_PICTURE_IN_PICTURE
                 )
-            && (playerFragment as VideoPlayerFragment).isVideoPlaying()
+            && videoPlayerFragment.isVideoPlaying()
             && hasPipPermission()
         ) {
             try {
@@ -157,11 +165,13 @@ class VideoPlayerActivity : AppCompatActivity(), VideoPlayerListener {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onPictureInPictureModeChanged(
         isInPictureInPictureMode: Boolean,
-        newConfig: Configuration?
+        newConfig: Configuration
     ) {
-        exoPlayerView.useController = !isInPictureInPictureMode
+//        binding.playerActivityContainer.exoPlayerView.useController = !isInPictureInPictureMode
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
     }
 
     private fun hasPipPermission(): Boolean {
@@ -192,16 +202,16 @@ class VideoPlayerActivity : AppCompatActivity(), VideoPlayerListener {
         viewModel.content.observe(this, Observer {
             this.content = it
             it?.let {
-                if (!it.urls.isNullOrEmpty()) {
-                    (playerFragment as VideoPlayerFragment).updateContent(it)
+                if (it.urls.isNotEmpty()) {
+                    videoPlayerFragment.updateContent(it)
                 }
             }
         })
         viewModel.isLoading.observe(this, Observer {
-            (playerFragment as VideoPlayerFragment).showLoading(it.isLoading)
+            videoPlayerFragment.showLoading(it.isLoading)
         })
         viewModel.errorModel.observe(this, Observer {
-            (playerFragment as VideoPlayerFragment).showErrorLayout(
+            videoPlayerFragment.showErrorLayout(
                 it.show,
                 it.errorMsgId,
                 it.errorCode

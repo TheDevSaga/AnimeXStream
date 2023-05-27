@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity() {
         } else {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
         }
-        updateRemoteConfig()
+//        updateRemoteConfig()
         toggleDayNight()
         setContentView(R.layout.main_activity)
     }

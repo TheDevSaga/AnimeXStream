@@ -74,6 +74,7 @@
         android:clipToPadding="false"
         />
     <include
+        android:id="@+id/loader"
         layout="@layout/loading"
         />
 
