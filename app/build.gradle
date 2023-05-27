@@ -34,7 +34,7 @@ android {
 //        useIR = true
     }
     defaultConfig {
-        applicationId "net.xblacky.animexstream"
+        applicationId "com.arosara.anisaw"
         minSdkVersion 21
         targetSdkVersion 33
         versionCode 17
