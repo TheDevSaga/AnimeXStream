@@ -1,16 +1,11 @@
 package net.xblacky.animexstream.ui.main.home
 
-import android.app.DownloadManager
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.database.*
-import com.google.firebase.database.ktx.database
-import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.collect
 import net.xblacky.animexstream.ui.main.home.di.HomeRepositoryModule
 import net.xblacky.animexstream.ui.main.home.source.HomeRepository
 import net.xblacky.animexstream.utils.Event
@@ -21,7 +16,6 @@ import net.xblacky.animexstream.utils.di.DispatcherModule
 import net.xblacky.animexstream.utils.model.AnimeMetaModel
 import net.xblacky.animexstream.utils.model.HomeScreenModel
 import net.xblacky.animexstream.utils.model.UpdateModel
-import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -32,14 +26,14 @@ class HomeViewModel @Inject constructor(
 
     private var _animeList: MutableLiveData<ArrayList<HomeScreenModel>> =
         MutableLiveData(makeEmptyArrayList())
-    var animeList: LiveData<ArrayList<HomeScreenModel>> = _animeList
+    val animeList: LiveData<ArrayList<HomeScreenModel>> = _animeList
 
     private val _scrollToTopEvent: MutableLiveData<Event<Boolean>> = MutableLiveData(Event(false))
     val scrollToTopEvent: LiveData<Event<Boolean>> = _scrollToTopEvent
 
     private var _updateModel: MutableLiveData<UpdateModel> = MutableLiveData()
     var updateModel: LiveData<UpdateModel> = _updateModel
-    private lateinit var database: DatabaseReference
+//    private lateinit var database: DatabaseReference
 
     init {
         fetchHomeList()
@@ -47,34 +41,16 @@ class HomeViewModel @Inject constructor(
 
     fun fetchHomeList() {
         viewModelScope.launch {
-            async { fetchRecentSub() }.await()
-            async { fetchRecentDub() }
-            async { fetchPopular() }
-            async { fetchNewSeason() }
-            async { fetchMovies() }
+            withContext(Dispatchers.IO) { fetchRecentSub() }
+            withContext(Dispatchers.IO) { fetchRecentDub() }
+            withContext(Dispatchers.IO) { fetchPopular() }
+            withContext(Dispatchers.IO) { fetchNewSeason() }
+            withContext(Dispatchers.IO) { fetchMovies() }
         }
 
     }
 
 
-    fun queryDB() {
-        database = Firebase.database.reference
-        val query: Query = database.child("appdata")
-        query.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onCancelled(ignored: DatabaseError) {
-                Timber.e(ignored.message)
-            }
-
-            override fun onDataChange(snapshot: DataSnapshot) {
-                Timber.e(snapshot.toString())
-                _updateModel.value = UpdateModel(
-                    versionCode = snapshot.child("versionCode").value as Long,
-                    whatsNew = snapshot.child("whatsNew").value.toString()
-                )
-            }
-
-        })
-    }
 
 
     private fun updateData(result: Result<ArrayList<AnimeMetaModel>>, typeValue: Int) {
@@ -84,11 +60,11 @@ class HomeViewModel @Inject constructor(
                 type = Utils.getTypeName(typeValue),
                 animeList = result.data
             )
-            val newList = animeList.value
+            val newList = animeList.value!!
             try {
-                newList?.set(getPositionByType(typeValue), homeScreenModel)
+                newList[getPositionByType(typeValue)] = homeScreenModel
 
-            } catch (iobe: IndexOutOfBoundsException) {
+            } catch (_: IndexOutOfBoundsException) {
             }
             _animeList.postValue(newList)
         }
