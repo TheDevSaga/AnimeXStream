@@ -7,6 +7,7 @@
 
     <ImageButton
         android:id="@+id/back"
+        android:importantForAccessibility="no"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="8dp"
@@ -52,6 +53,7 @@
 
     <ImageButton
         android:id="@+id/exo_play"
+        android:importantForAccessibility="no"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="?selectableItemBackgroundBorderless"
@@ -77,6 +79,7 @@
 
         <ImageButton
             android:id="@+id/exo_rew"
+            android:importantForAccessibility="no"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="48dp"
@@ -120,6 +123,7 @@
 
     <ImageButton
         android:id="@+id/exo_pause"
+        android:importantForAccessibility="no"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="?selectableItemBackgroundBorderless"
@@ -151,6 +155,7 @@
             android:padding="16dp"
             android:background="?selectableItemBackgroundBorderless"
             android:src="@drawable/ic_media_seek_forward"
+            android:importantForAccessibility="no"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -201,6 +206,7 @@
 
     <com.google.android.exoplayer2.ui.DefaultTimeBar
         android:id="@+id/exo_progress"
+        android:importantForAccessibility="no"
         android:layout_width="0dp"
         android:layout_height="30dp"
         android:progressTint="@color/media_player_controls"
@@ -225,6 +231,7 @@
 
         <LinearLayout
             android:id="@+id/previousEpisode"
+            android:importantForAccessibility="no"
             android:layout_width="wrap_content"
             android:layout_height="30dp"
             android:layout_marginStart="16dp"
@@ -255,6 +262,7 @@
 
         <LinearLayout
             android:id="@+id/exo_speed_selection_view"
+            android:importantForAccessibility="no"
             android:layout_width="wrap_content"
             android:layout_height="30dp"
             android:background="?selectableItemBackgroundBorderless"
@@ -283,6 +291,7 @@
 
         <LinearLayout
             android:id="@+id/exo_track_selection_view"
+            android:importantForAccessibility="no"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="?selectableItemBackgroundBorderless"
@@ -313,6 +322,7 @@
 
         <LinearLayout
             android:id="@+id/nextEpisode"
+            android:importantForAccessibility="no"
             android:layout_width="wrap_content"
             android:layout_height="30dp"
             android:layout_marginEnd="16dp"
