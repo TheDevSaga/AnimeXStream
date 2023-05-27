@@ -27,15 +27,15 @@ class HtmlParser {
                 throw ParserEmptyDataException()
             val animeMetaModelList: ArrayList<AnimeMetaModel> = ArrayList()
             val document = Jsoup.parse(response)
-            val lists = document?.getElementsByClass("items")?.first()?.select("li")
+            val lists = document.getElementsByClass("items").first()?.select("li")
             lists?.forEachIndexed { index, anime ->
                 try {
-                    val animeInfo = anime.getElementsByClass("name").first().select("a")
+                    val animeInfo = anime.getElementsByClass("name").first()!!.select("a")
                     val title = animeInfo.attr("title")
                     val episodeUrl = animeInfo.attr("href")
-                    val episodeNumber = anime.getElementsByClass("episode").first().text()
+                    val episodeNumber = anime.getElementsByClass("episode").first()!!.text()
                     val animeImageInfo = anime.selectFirst("a")
-                    val imageUrl = animeImageInfo.select("img").first().absUrl("src")
+                    val imageUrl = animeImageInfo!!.select("img").first()!!.absUrl("src")
 
                     animeMetaModelList.add(
                         AnimeMetaModel(
@@ -69,15 +69,15 @@ class HtmlParser {
                 throw ParserEmptyDataException()
             val document = Jsoup.parse(response)
             val lists =
-                document?.getElementsByClass("added_series_body popular")?.first()?.select("ul")
+                document.getElementsByClass("added_series_body popular").first()?.select("ul")
                     ?.first()?.select("li")
             lists?.forEachIndexed { index, anime ->
 
                 try {
                     val animeInfoFirst = anime.select("a").first()
                     val imageDiv =
-                        animeInfoFirst.getElementsByClass("thumbnail-popular").first()
-                            .attr("style")
+                        animeInfoFirst!!.getElementsByClass("thumbnail-popular").first()
+                            ?.attr("style")
                             .toString()
                     val imageUrl =
                         imageDiv.substring(
@@ -86,10 +86,10 @@ class HtmlParser {
                         )
                     val categoryUrl = animeInfoFirst.attr("href")
                     val animeTitle = animeInfoFirst.attr("title")
-                    val animeInfoSecond = anime.select("p").last().select("a")
+                    val animeInfoSecond = anime.select("p").last()!!.select("a")
                     val episodeUrl = animeInfoSecond.attr("href")
                     val episodeNumber = animeInfoSecond.text()
-                    val genreHtmlList = anime.getElementsByClass("genres").first().select("a")
+                    val genreHtmlList = anime.getElementsByClass("genres").first()!!.select("a")
                     val genreList = RealmList<GenreModel>()
                     genreList.addAll(getGenreList(genreHtmlList))
 
@@ -127,15 +127,15 @@ class HtmlParser {
             if (response.isEmpty())
                 throw ParserEmptyDataException()
             val document = Jsoup.parse(response)
-            val lists = document?.getElementsByClass("items")?.first()?.select("li")
+            val lists = document.getElementsByClass("items").first()?.select("li")
             lists?.forEachIndexed { index, animeMovie ->
                 try {
                     val movieInfo = animeMovie.select("a").first()
-                    val movieUrl = movieInfo.attr("href")
-                    val movieName = movieInfo.attr("title")
-                    val imageUrl = movieInfo.select("img").first().absUrl("src")
+                    val movieUrl = movieInfo?.attr("href")
+                    val movieName = movieInfo!!.attr("title")
+                    val imageUrl = movieInfo.select("img").first()!!.absUrl("src")
                     val releasedDate =
-                        animeMovie.getElementsByClass("released")?.first()?.text()
+                        animeMovie.getElementsByClass("released").first()?.text()
                     animeMetaModelList.add(
                         AnimeMetaModel(
                             ID = "$movieName$typeValue".hashCode().hashCode(),
@@ -164,15 +164,15 @@ class HtmlParser {
         fun parseAnimeInfo(response: String): AnimeInfoModel {
             val document = Jsoup.parse(response)
             val animeInfo = document.getElementsByClass("anime_info_body_bg")
-            val animeUrl = animeInfo.select("img").first().absUrl("src")
-            val animeTitle = animeInfo.select("h1").first().text()
-            val lists = document?.getElementsByClass("type")
+            val animeUrl = animeInfo.select("img").first()!!.absUrl("src")
+            val animeTitle = animeInfo.select("h1").first()!!.text()
+            val lists = document.getElementsByClass("type")
             lateinit var type: String
             lateinit var releaseTime: String
             lateinit var status: String
             lateinit var plotSummary: String
             val genre: RealmList<GenreModel> = RealmList()
-            lists?.forEachIndexed { index, element ->
+            lists.forEachIndexed { index, element ->
                 when (index) {
                     0 -> type = element.text()
                     1 -> plotSummary = element.text()
@@ -182,10 +182,10 @@ class HtmlParser {
                 }
             }
             val episodeInfo = document.getElementById("episode_page")
-            val episodeList = episodeInfo.select("a").last()
-            val endEpisode = episodeList.attr("ep_end")
-            val alias = document.getElementById("alias_anime").attr("value")
-            val id = document.getElementById("movie_id").attr("value")
+            val episodeList = episodeInfo?.select("a")?.last()
+            val endEpisode = episodeList?.attr("ep_end")
+            val alias = document.getElementById("alias_anime")!!.attr("value")
+            val id = document.getElementById("movie_id")!!.attr("value")
             return AnimeInfoModel(
                 id = id,
                 animeTitle = animeTitle,
@@ -201,15 +201,15 @@ class HtmlParser {
         }
 
         fun parseMediaUrl(response: String): EpisodeInfo {
-            var mediaUrl: String?
+            val mediaUrl: String?
             val document = Jsoup.parse(response)
-            val info = document?.getElementsByClass("anime")?.first()?.select("a")
+            val info = document.getElementsByClass("anime").first()?.select("a")
             mediaUrl = info?.attr("data-video").toString()
             val nextEpisodeUrl =
-                document.getElementsByClass("anime_video_body_episodes_r")?.select("a")?.first()
+                document.getElementsByClass("anime_video_body_episodes_r").select("a").first()
                     ?.attr("href")
             val previousEpisodeUrl =
-                document.getElementsByClass("anime_video_body_episodes_l")?.select("a")?.first()
+                document.getElementsByClass("anime_video_body_episodes_l").select("a").first()
                     ?.attr("href")
 
 
@@ -295,7 +295,7 @@ class HtmlParser {
         fun parseM3U8Url(response: String): String? {
             var m3u8Url: String? = ""
             val document = Jsoup.parse(response)
-            val info = document?.getElementsByClass("videocontent")
+            val info = document.getElementsByClass("videocontent")
             val pattern = Pattern.compile(C.M3U8_REGEX_PATTERN)
             val matcher = pattern.matcher(info.toString())
             return try {
@@ -318,11 +318,11 @@ class HtmlParser {
         fun fetchEpisodeList(response: String): ArrayList<EpisodeModel> {
             val episodeList = ArrayList<EpisodeModel>()
             val document = Jsoup.parse(response)
-            val lists = document?.select("li")
-            lists?.forEach {
-                val episodeUrl = it.select("a").first().attr("href").trim()
-                val episodeNumber = it.getElementsByClass("name").first().text()
-                val episodeType = it.getElementsByClass("cate").first().text()
+            val lists = document.select("li")
+            lists.forEach {
+                val episodeUrl = it.select("a").first()!!.attr("href").trim()
+                val episodeNumber = it.getElementsByClass("name").first()!!.text()
+                val episodeType = it.getElementsByClass("cate").first()!!.text()
                 episodeList.add(
                     EpisodeModel(
                         episodeNumber = episodeNumber,
