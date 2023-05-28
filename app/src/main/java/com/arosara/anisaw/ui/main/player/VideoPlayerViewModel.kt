@@ -3,9 +3,6 @@ package com.arosara.anisaw.ui.main.player
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.launch
 import com.arosara.anisaw.ui.main.player.source.EpisodeRepository
 import com.arosara.anisaw.utils.CommonViewModel
 import com.arosara.anisaw.utils.di.AppModules
@@ -13,6 +10,9 @@ import com.arosara.anisaw.utils.di.DispatcherModule
 import com.arosara.anisaw.utils.model.Content
 import com.arosara.anisaw.utils.model.EpisodeInfo
 import com.arosara.anisaw.utils.model.M3U8FromAjaxModel
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.net.URI
 import javax.inject.Inject
@@ -86,7 +86,7 @@ class VideoPlayerViewModel @Inject constructor(
                     val encryptedAjaxUrl = "${cdnServer.value}encrypt-ajax.php?$encryptedAjaxParams"
                     Timber.e(encryptedAjaxUrl)
                     val m3u8Data = episodeRepository.fetchM3U8DataFromAjax(encryptedAjaxUrl)
-                    handleM3U8Url(m3u8Data!!)
+                    handleM3U8Url(m3u8Data)
 
                 }
             } catch (exc: Exception) {
@@ -113,7 +113,7 @@ class VideoPlayerViewModel @Inject constructor(
     }
 
     fun saveContent(content: Content) {
-        if (!content.urls.isNullOrEmpty()) {
+        if (content.urls.isNotEmpty()) {
             episodeRepository.saveWatchProgress(content)
         }
     }
