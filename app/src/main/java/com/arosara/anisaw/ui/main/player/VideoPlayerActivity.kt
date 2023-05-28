@@ -7,23 +7,21 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Build
+import android.os.Build.VERSION_CODES
 import android.os.Bundle
 import android.view.View
-import android.view.WindowManager
-import androidx.appcompat.app.AppCompatActivity
-import dagger.hilt.android.AndroidEntryPoint
-import com.arosara.anisaw.R
-import com.arosara.anisaw.utils.model.Content
-import timber.log.Timber
-import java.lang.Exception
-import android.view.WindowInsetsController
-
 import android.view.WindowInsets
+import android.view.WindowInsetsController
+import android.view.WindowManager
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
-import androidx.lifecycle.Observer
+import androidx.appcompat.app.AppCompatActivity
+import com.arosara.anisaw.R
 import com.arosara.anisaw.databinding.ActivityVideoPlayerBinding
+import com.arosara.anisaw.utils.model.Content
 import com.arosara.anisaw.utils.preference.Preference
+import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 import javax.inject.Inject
 
 
@@ -66,14 +64,11 @@ class VideoPlayerActivity : AppCompatActivity(), VideoPlayerListener {
     }
 
     override fun onUserLeaveHint() {
-        super.onUserLeaveHint()
         enterPipMode()
+        super.onUserLeaveHint()
     }
 
 
-    override fun onResume() {
-        super.onResume()
-    }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
@@ -97,9 +92,9 @@ class VideoPlayerActivity : AppCompatActivity(), VideoPlayerListener {
         viewModel.fetchEpisodeData()
     }
 
-    @Suppress("DEPRECATION")
+
     private fun enterPipMode() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
+        if (Build.VERSION.SDK_INT >= VERSION_CODES.N
             && packageManager
                 .hasSystemFeature(
                     PackageManager.FEATURE_PICTURE_IN_PICTURE
@@ -107,17 +102,19 @@ class VideoPlayerActivity : AppCompatActivity(), VideoPlayerListener {
             && hasPipPermission()
             && videoPlayerFragment.isVideoPlaying()
         ) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (Build.VERSION.SDK_INT >= VERSION_CODES.O) {
                 val params = PictureInPictureParams.Builder()
+                if(Build.VERSION.SDK_INT>= VERSION_CODES.S){
+                    params.setSeamlessResizeEnabled(true)
+
+                }
                 this.enterPictureInPictureMode(params.build())
-            } else {
-                this.enterPictureInPictureMode()
             }
         }
     }
 
     override fun onStop() {
-        if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+        if ((Build.VERSION.SDK_INT >= VERSION_CODES.N)
             && packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
             && hasPipPermission()
         ) {
@@ -127,7 +124,7 @@ class VideoPlayerActivity : AppCompatActivity(), VideoPlayerListener {
     }
 
     override fun finish() {
-        if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+        if ((Build.VERSION.SDK_INT >= VERSION_CODES.N)
             && packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
         ) {
             finishAndRemoveTask()
@@ -138,7 +135,7 @@ class VideoPlayerActivity : AppCompatActivity(), VideoPlayerListener {
     }
 
     fun enterPipModeOrExit() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
+        if (Build.VERSION.SDK_INT >= VERSION_CODES.N
             && packageManager
                 .hasSystemFeature(
                     PackageManager.FEATURE_PICTURE_IN_PICTURE
@@ -148,11 +145,9 @@ class VideoPlayerActivity : AppCompatActivity(), VideoPlayerListener {
         ) {
             try {
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                if (Build.VERSION.SDK_INT >= VERSION_CODES.O) {
                     val params = PictureInPictureParams.Builder()
                     this.enterPictureInPictureMode(params.build())
-                } else {
-                    this.enterPictureInPictureMode()
                 }
             } catch (ex: Exception) {
                 Timber.e(ex)
@@ -164,26 +159,26 @@ class VideoPlayerActivity : AppCompatActivity(), VideoPlayerListener {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
+    @RequiresApi(VERSION_CODES.O)
     override fun onPictureInPictureModeChanged(
         isInPictureInPictureMode: Boolean,
         newConfig: Configuration
     ) {
-//        binding.playerActivityContainer.exoPlayerView.useController = !isInPictureInPictureMode
+        videoPlayerFragment.setControllerVisibility(!isInPictureInPictureMode)
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
     }
 
     private fun hasPipPermission(): Boolean {
         val appsOps = getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
         return when {
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
+            Build.VERSION.SDK_INT >= VERSION_CODES.Q -> {
                 appsOps.unsafeCheckOpNoThrow(
                     AppOpsManager.OPSTR_PICTURE_IN_PICTURE,
                     android.os.Process.myUid(),
                     packageName
                 ) == AppOpsManager.MODE_ALLOWED
             }
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> {
+            Build.VERSION.SDK_INT >= VERSION_CODES.O -> {
                 appsOps.checkOpNoThrow(
                     AppOpsManager.OPSTR_PICTURE_IN_PICTURE,
                     android.os.Process.myUid(),
@@ -198,24 +193,24 @@ class VideoPlayerActivity : AppCompatActivity(), VideoPlayerListener {
 
     private fun setObserver() {
 
-        viewModel.content.observe(this, Observer {
+        viewModel.content.observe(this) {
             this.content = it
             it?.let {
                 if (it.urls.isNotEmpty()) {
                     videoPlayerFragment.updateContent(it)
                 }
             }
-        })
-        viewModel.isLoading.observe(this, Observer {
+        }
+        viewModel.isLoading.observe(this) {
             videoPlayerFragment.showLoading(it.isLoading)
-        })
-        viewModel.errorModel.observe(this, Observer {
+        }
+        viewModel.errorModel.observe(this) {
             videoPlayerFragment.showErrorLayout(
                 it.show,
                 it.errorMsgId,
                 it.errorCode
             )
-        })
+        }
 
         viewModel.cdnServer.observe(this) {
             Timber.e("Referrer : $it")
@@ -228,7 +223,7 @@ class VideoPlayerActivity : AppCompatActivity(), VideoPlayerListener {
     }
 
     private fun goFullScreen() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        if (Build.VERSION.SDK_INT >= VERSION_CODES.R) {
             window.setDecorFitsSystemWindows(false)
             val controller = window.insetsController
             if (controller != null) {

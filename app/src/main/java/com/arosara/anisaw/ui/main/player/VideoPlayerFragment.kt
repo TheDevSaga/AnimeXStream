@@ -30,6 +30,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.arosara.anisaw.R
+import com.arosara.anisaw.databinding.ErrorScreenVideoPlayerBinding
 import com.arosara.anisaw.databinding.ExoPlayerCustomControlsBinding
 import com.arosara.anisaw.databinding.FragmentVideoPlayerBinding
 import com.arosara.anisaw.ui.main.player.di.PlayerDI
@@ -42,6 +43,7 @@ import com.arosara.anisaw.utils.constants.C.Companion.RESPONSE_UNKNOWN
 import com.arosara.anisaw.utils.model.Content
 import com.arosara.anisaw.utils.preference.Preference
 import com.arosara.anisaw.utils.touchevents.TouchUtils
+import com.google.android.exoplayer2.C.TRACK_TYPE_VIDEO
 import okhttp3.OkHttpClient
 import timber.log.Timber
 import java.lang.Exception
@@ -62,6 +64,7 @@ class VideoPlayerFragment : Fragment(), View.OnClickListener, Player.Listener,
     lateinit var okHttpClient: OkHttpClient
 
     private lateinit var binding :FragmentVideoPlayerBinding
+    private lateinit var errorBinding :ErrorScreenVideoPlayerBinding
     private lateinit var videoUrl: String
     private lateinit var controllerBinding: ExoPlayerCustomControlsBinding
     private lateinit var player: ExoPlayer
@@ -98,6 +101,7 @@ class VideoPlayerFragment : Fragment(), View.OnClickListener, Player.Listener,
         super.onCreateView(inflater, container, savedInstanceState)
         binding = FragmentVideoPlayerBinding.inflate(inflater,container,false)
         controllerBinding = ExoPlayerCustomControlsBinding.bind(binding.root)
+        errorBinding = ErrorScreenVideoPlayerBinding.bind(binding.root)
         setClickListeners()
         initializeAudioManager()
         initializePlayer()
@@ -121,6 +125,9 @@ class VideoPlayerFragment : Fragment(), View.OnClickListener, Player.Listener,
             handler.removeCallbacksAndMessages(null)
         }
         super.onDestroy()
+    }
+    fun setControllerVisibility(visibility:Boolean){
+        binding.exoPlayerView.useController = visibility
     }
 
     private fun initializePlayer() {
@@ -159,7 +166,7 @@ class VideoPlayerFragment : Fragment(), View.OnClickListener, Player.Listener,
         controllerBinding.exoSpeedSelectionView.setOnClickListener(this)
         controllerBinding.exoRew.setOnClickListener(this)
         controllerBinding.exoFfwd.setOnClickListener(this)
-//        controllerBinding.errorButton.setOnClickListener(this)
+        errorBinding.errorButton.setOnClickListener(this)
         controllerBinding.back.setOnClickListener(this)
         controllerBinding.nextEpisode.setOnClickListener(this)
         controllerBinding.previousEpisode.setOnClickListener(this)
@@ -280,7 +287,7 @@ class VideoPlayerFragment : Fragment(), View.OnClickListener, Player.Listener,
                 requireContext(),
                 getString(R.string.video_quality),
                 player,
-                0
+                TRACK_TYPE_VIDEO
             ).build().show()
         } catch (ignored: java.lang.NullPointerException) {
         }
@@ -293,11 +300,28 @@ class VideoPlayerFragment : Fragment(), View.OnClickListener, Player.Listener,
     ) {
         if (IS_MEDIA_M3U8) {
             try {
-//                val videoQuality =
-//                    tracks.groups[0]!!.getTrackSupport(0).getFormat(0).height.toString() + "p"
-//                val quality = "Quality($videoQuality)"
-//                Timber.e("Quality $quality")
-//                controllerBinding.exoQuality.text = quality
+
+              val trackGroup = tracks.groups[0]
+                var quality= "Auto"
+                var count =0
+                if(trackGroup.isSelected){
+                    for(i in 0 until trackGroup.length){
+
+                        if(trackGroup.isTrackSelected(i)){
+                            count++
+                            quality = "${trackGroup.getTrackFormat(i).height}p"
+                            println("Quality : $quality")
+                        }
+
+                    }
+                    if(count>1){
+                        quality = "Auto"
+                    }
+                        val videoQuality = "Quality($quality)"
+                        controllerBinding.exoQuality.text = videoQuality
+
+                }
+
             } catch (ignored: Exception) {
             }
 
